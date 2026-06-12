@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Семейный бюджет 2026</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface2: #1c2333;
+    --border: #30363d;
+    --text: #e6edf3;
+    --text-muted: #7d8590;
+    --teal: #39d353;
+    --blue: #388bfd;
+    --purple: #bc8cff;
+    --orange: #f0883e;
+    --red: #f85149;
+    --yellow: #d29922;
+    --pink: #ff7b72;
+    --cyan: #56d4dd;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  .header {
+    background: linear-gradient(135deg, #0d1117 0%, #161b22 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 24px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .header-left h1 {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.3px;
+  }
+  .header-left p {
+    color: var(--text-muted);
+    font-size: 12px;
+    margin-top: 2px;
+  }
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+  .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--teal);
+    box-shadow: 0 0 6px var(--teal);
+  }
+
+  /* LAYOUT */
+  .main { padding: 24px 32px; max-width: 1400px; margin: 0 auto; }
+
+  /* KPI CARDS */
+  .kpis {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .kpi {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .kpi:hover { border-color: #484f58; }
+  .kpi::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    border-radius: 12px 12px 0 0;
+  }
+  .kpi.green::before { background: var(--teal); }
+  .kpi.red::before   { background: var(--red); }
+  .kpi.blue::before  { background: var(--blue); }
+  .kpi.purple::before{ background: var(--purple); }
+
+  .kpi-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+  .kpi-value {
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .kpi.green .kpi-value { color: var(--teal); }
+  .kpi.red   .kpi-value { color: var(--red); }
+  .kpi.blue  .kpi-value { color: var(--blue); }
+  .kpi.purple .kpi-value { color: var(--purple); }
+  .kpi-sub {
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+
+  /* GRID */
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+  .grid-3 {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+
+  /* CARD */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    transition: border-color 0.2s;
+  }
+  .card:hover { border-color: #484f58; }
+  .card-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+  .card-sub {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+  }
+  .chart-wrap {
+    position: relative;
+  }
+
+  /* NET INDICATOR */
+  .net-bar {
+    margin-top: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .net-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .net-month {
+    width: 56px;
+    font-size: 11px;
+    color: var(--text-muted);
+    flex-shrink: 0;
+  }
+  .net-track {
+    flex: 1;
+    height: 8px;
+    background: var(--surface2);
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+  }
+  .net-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.5s;
+  }
+  .net-val {
+    width: 70px;
+    font-size: 11px;
+    text-align: right;
+    flex-shrink: 0;
+    font-weight: 600;
+  }
+
+  /* CATEGORY LIST */
+  .cat-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 4px;
+  }
+  .cat-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .cat-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .cat-name {
+    flex: 1;
+    font-size: 12px;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .cat-track {
+    width: 100px;
+    height: 6px;
+    background: var(--surface2);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .cat-fill { height: 100%; border-radius: 3px; }
+  .cat-val {
+    width: 64px;
+    font-size: 11px;
+    text-align: right;
+    color: var(--text-muted);
+    flex-shrink: 0;
+  }
+
+  /* FOOTER */
+  .footer {
+    border-top: 1px solid var(--border);
+    padding: 16px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: var(--text-muted);
+    font-size: 11px;
+    margin-top: 8px;
+  }
+  .footer span { opacity: 0.6; }
+
+  /* SAVINGS BADGE */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 600;
+    margin-left: 8px;
+    vertical-align: middle;
+  }
+  .badge-green { background: rgba(57,211,83,0.15); color: var(--teal); }
+  .badge-red   { background: rgba(248,81,73,0.15);  color: var(--red); }
+
+  @media (max-width: 900px) {
+    .kpis { grid-template-columns: 1fr 1fr; }
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    .main { padding: 16px; }
+    .header { padding: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <h1>Семейный бюджет</h1>
+    <p>Январь — Май 2026 · Жандос & Анель</p>
+  </div>
+  <div class="header-right">
+    <div class="dot"></div>
+    Обновлено: июнь 2026
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- KPI CARDS -->
+  <div class="kpis">
+    <div class="kpi green">
+      <div class="kpi-label">Суммарно доходов</div>
+      <div class="kpi-value">17 475</div>
+      <div class="kpi-sub">тыс. тенге · янв–май 2026</div>
+    </div>
+    <div class="kpi red">
+      <div class="kpi-label">Суммарно расходов</div>
+      <div class="kpi-value">17 265</div>
+      <div class="kpi-sub">тыс. тенге · без межсчётных</div>
+    </div>
+    <div class="kpi blue">
+      <div class="kpi-label">Чистая позиция</div>
+      <div class="kpi-value">+210</div>
+      <div class="kpi-sub">тыс. тенге · за период</div>
+    </div>
+    <div class="kpi purple">
+      <div class="kpi-label">Ср. расходы / месяц</div>
+      <div class="kpi-value">3 453</div>
+      <div class="kpi-sub">тыс. тенге · за 5 месяцев</div>
+    </div>
+  </div>
+
+  <!-- ROW 1: INCOME vs EXPENSES + NET -->
+  <div class="grid-3">
+    <div class="card">
+      <div class="card-title">Доходы vs Расходы</div>
+      <div class="card-sub">тыс. тенге в месяц (без межсчётных переводов)</div>
+      <div class="chart-wrap" style="height:240px">
+        <canvas id="incExpChart"></canvas>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Профицит / дефицит</div>
+      <div class="card-sub">доходы минус расходы, тыс. тенге</div>
+      <div class="net-bar" id="netBar"></div>
+    </div>
+  </div>
+
+  <!-- ROW 2: STACKED + DONUT -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Расходы по категориям по месяцам</div>
+      <div class="card-sub">тыс. тенге · топ-9 категорий</div>
+      <div class="chart-wrap" style="height:260px">
+        <canvas id="stackedChart"></canvas>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Структура расходов</div>
+      <div class="card-sub">суммарно за янв–май 2026, тыс. тенге</div>
+      <div style="display:flex; gap:20px; align-items:center; margin-top:4px">
+        <div class="chart-wrap" style="height:220px; width:220px; flex-shrink:0">
+          <canvas id="donutChart"></canvas>
+        </div>
+        <div class="cat-list" id="catList" style="flex:1"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROW 3: ПИТАНИЕ LINE -->
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-title">Расходы на питание по месяцам</div>
+    <div class="card-sub">тыс. тенге · стабильная статья семейного бюджета</div>
+    <div class="chart-wrap" style="height:160px">
+      <canvas id="foodChart"></canvas>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  <span>Семейный бюджет · Жандос & Анель · 2026</span>
+  <span>Данные: Kaspi Gold, BCC Travel, BCC Deposit, Freedom Super, Отбасы, Kaspi Deposit</span>
+</div>
+
+<script>
+const DATA = {"months":["Январь","Февраль","Март","Апрель","Май"],"income":[3290.9,3219.9,2916.3,2759.2,5288.3],"expenses":[2440.2,2743.8,2800.2,3755.0,5525.8],"net":[850.7,476.1,116.1,-995.8,-237.5],"cats":["Питание","Крупные покупки","Дом и быт","Одежда и внешний вид","Отдых и досуг","Подарки","Транспорт","Личные расходы","Здоровье"],"cat_totals":[2499.5,1031.2,911.3,740.8,619.6,541.2,488.5,255.6,230.8],"cat_by_month":{"Питание":[453.6,519.3,510.1,510.6,505.8],"Крупные покупки":[475.5,187.6,100.8,175.8,91.6],"Дом и быт":[347.4,245.5,105.4,116.6,96.4],"Одежда и внешний вид":[74.2,232.5,23.1,70.8,340.2],"Отдых и досуг":[131.7,89.5,253.5,91.7,53.1],"Подарки":[21.9,231.8,169.8,60.7,57.0],"Транспорт":[54.9,83.6,82.3,178.2,89.5],"Личные расходы":[13.3,25.5,112.1,88.2,16.4],"Здоровье":[9.0,19.2,27.3,74.0,101.3]}};
+
+const COLORS = ['#388bfd','#bc8cff','#39d353','#f0883e','#56d4dd','#f85149','#d29922','#ff7b72','#a5d6ff'];
+
+const defaults = {
+  color: '#e6edf3',
+  plugins: {
+    legend: {
+      labels: { color: '#7d8590', font: { size: 11 }, boxWidth: 12, padding: 12 }
+    },
+    tooltip: {
+      backgroundColor: '#1c2333',
+      titleColor: '#e6edf3',
+      bodyColor: '#7d8590',
+      borderColor: '#30363d',
+      borderWidth: 1,
+      padding: 10,
+    }
+  },
+  scales: {
+    x: {
+      ticks: { color: '#7d8590', font: { size: 11 } },
+      grid: { color: '#21262d' },
+      border: { color: '#30363d' }
+    },
+    y: {
+      ticks: { color: '#7d8590', font: { size: 11 } },
+      grid: { color: '#21262d' },
+      border: { color: '#30363d' }
+    }
+  }
+};
+
+// ---- Income vs Expenses ----
+new Chart(document.getElementById('incExpChart'), {
+  type: 'bar',
+  data: {
+    labels: DATA.months,
+    datasets: [
+      {
+        label: 'Доходы',
+        data: DATA.income,
+        backgroundColor: 'rgba(57,211,83,0.25)',
+        borderColor: '#39d353',
+        borderWidth: 2,
+        borderRadius: 6,
+      },
+      {
+        label: 'Расходы',
+        data: DATA.expenses,
+        backgroundColor: 'rgba(248,81,73,0.2)',
+        borderColor: '#f85149',
+        borderWidth: 2,
+        borderRadius: 6,
+      }
+    ]
+  },
+  options: {
+    ...defaults,
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { ...defaults.plugins, legend: { ...defaults.plugins.legend, position: 'top' } },
+    scales: { ...defaults.scales, y: { ...defaults.scales.y, ticks: { ...defaults.scales.y.ticks, callback: v => v.toLocaleString('ru') } } }
+  }
+});
+
+// ---- Net bars ----
+const netMax = Math.max(...DATA.net.map(Math.abs));
+const netEl = document.getElementById('netBar');
+DATA.months.forEach((m, i) => {
+  const v = DATA.net[i];
+  const pct = Math.abs(v) / netMax * 100;
+  const pos = v >= 0;
+  const color = pos ? '#39d353' : '#f85149';
+  netEl.innerHTML += `
+    <div class="net-row">
+      <div class="net-month">${m.slice(0,3)}</div>
+      <div class="net-track">
+        <div class="net-fill" style="width:${pct}%;background:${color}"></div>
+      </div>
+      <div class="net-val" style="color:${color}">${pos?'+':''}${v.toLocaleString('ru', {maximumFractionDigits:0})}</div>
+    </div>`;
+});
+
+// ---- Stacked bar ----
+new Chart(document.getElementById('stackedChart'), {
+  type: 'bar',
+  data: {
+    labels: DATA.months,
+    datasets: DATA.cats.map((cat, i) => ({
+      label: cat,
+      data: DATA.cat_by_month[cat],
+      backgroundColor: COLORS[i] + '99',
+      borderColor: COLORS[i],
+      borderWidth: 1,
+      borderRadius: 3,
+    }))
+  },
+  options: {
+    ...defaults,
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { ...defaults.plugins, legend: { ...defaults.plugins.legend, position: 'bottom' } },
+    scales: {
+      ...defaults.scales,
+      x: { ...defaults.scales.x, stacked: true },
+      y: { ...defaults.scales.y, stacked: true, ticks: { ...defaults.scales.y.ticks, callback: v => v.toLocaleString('ru') } }
+    }
+  }
+});
+
+// ---- Donut ----
+new Chart(document.getElementById('donutChart'), {
+  type: 'doughnut',
+  data: {
+    labels: DATA.cats,
+    datasets: [{
+      data: DATA.cat_totals,
+      backgroundColor: COLORS.map(c => c + 'cc'),
+      borderColor: '#161b22',
+      borderWidth: 3,
+      hoverOffset: 8,
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    cutout: '62%',
+    plugins: {
+      legend: { display: false },
+      tooltip: { ...defaults.plugins.tooltip,
+        callbacks: { label: ctx => ` ${ctx.label}: ${ctx.parsed.toLocaleString('ru')} тыс.` }
+      }
+    }
+  }
+});
+
+// ---- Category list ----
+const maxCat = DATA.cat_totals[0];
+const catEl = document.getElementById('catList');
+DATA.cats.forEach((cat, i) => {
+  const pct = DATA.cat_totals[i] / maxCat * 100;
+  catEl.innerHTML += `
+    <div class="cat-row">
+      <div class="cat-dot" style="background:${COLORS[i]}"></div>
+      <div class="cat-name">${cat}</div>
+      <div class="cat-track"><div class="cat-fill" style="width:${pct}%;background:${COLORS[i]}"></div></div>
+      <div class="cat-val">${DATA.cat_totals[i].toLocaleString('ru')} тыс.</div>
+    </div>`;
+});
+
+// ---- Food line ----
+new Chart(document.getElementById('foodChart'), {
+  type: 'line',
+  data: {
+    labels: DATA.months,
+    datasets: [{
+      label: 'Питание',
+      data: DATA.cat_by_month['Питание'],
+      borderColor: '#388bfd',
+      backgroundColor: 'rgba(56,139,253,0.1)',
+      fill: true,
+      tension: 0.4,
+      pointBackgroundColor: '#388bfd',
+      pointBorderColor: '#161b22',
+      pointBorderWidth: 2,
+      pointRadius: 5,
+    }]
+  },
+  options: {
+    ...defaults,
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { ...defaults.plugins, legend: { display: false } },
+    scales: { ...defaults.scales, y: { ...defaults.scales.y, ticks: { ...defaults.scales.y.ticks, callback: v => v + ' тыс.' } } }
+  }
+});
+</script>
+</body>
+</html>
