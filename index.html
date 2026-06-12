@@ -6,364 +6,174 @@
 <title>Семейный бюджет 2026</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
-  :root {
-    --bg: #0d1117;
-    --surface: #161b22;
-    --surface2: #1c2333;
-    --border: #30363d;
-    --text: #e6edf3;
-    --text-muted: #7d8590;
-    --teal: #39d353;
-    --blue: #388bfd;
-    --purple: #bc8cff;
-    --orange: #f0883e;
-    --red: #f85149;
-    --yellow: #d29922;
-    --pink: #ff7b72;
-    --cyan: #56d4dd;
-  }
+:root {
+  --bg:#0d1117; --surface:#161b22; --surface2:#1c2333; --border:#30363d;
+  --text:#e6edf3; --muted:#7d8590;
+  --green:#39d353; --blue:#388bfd; --purple:#bc8cff; --orange:#f0883e;
+  --red:#f85149; --yellow:#d29922; --pink:#ff7b72; --cyan:#56d4dd;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:14px;line-height:1.5;min-height:100vh}
 
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+/* HEADER */
+.header{background:linear-gradient(135deg,#0d1117,#161b22);border-bottom:1px solid var(--border);padding:20px 28px;display:flex;align-items:center;justify-content:space-between}
+.header h1{font-size:20px;font-weight:700;letter-spacing:-0.3px}
+.header p{color:var(--muted);font-size:12px;margin-top:2px}
+.badge-live{display:flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;color:var(--muted)}
+.dot-live{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 5px var(--green)}
 
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    font-size: 14px;
-    line-height: 1.5;
-    min-height: 100vh;
-  }
+/* FILTER NOTICE */
+.filter-bar{background:var(--surface2);border-bottom:1px solid var(--border);padding:8px 28px;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted)}
+.filter-tag{background:rgba(56,139,253,0.15);color:var(--blue);border:1px solid rgba(56,139,253,0.3);border-radius:12px;padding:2px 10px;font-size:11px;font-weight:600;display:none}
+.filter-tag.active{display:inline-flex;align-items:center;gap:4px}
+.filter-tag .x{cursor:pointer;opacity:0.7;margin-left:2px}
+.filter-tag .x:hover{opacity:1}
 
-  /* HEADER */
-  .header {
-    background: linear-gradient(135deg, #0d1117 0%, #161b22 100%);
-    border-bottom: 1px solid var(--border);
-    padding: 24px 32px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-  .header-left h1 {
-    font-size: 22px;
-    font-weight: 700;
-    color: var(--text);
-    letter-spacing: -0.3px;
-  }
-  .header-left p {
-    color: var(--text-muted);
-    font-size: 12px;
-    margin-top: 2px;
-  }
-  .header-right {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 6px 14px;
-    font-size: 12px;
-    color: var(--text-muted);
-  }
-  .dot {
-    width: 8px; height: 8px;
-    border-radius: 50%;
-    background: var(--teal);
-    box-shadow: 0 0 6px var(--teal);
-  }
+.main{padding:20px 28px;max-width:1440px;margin:0 auto}
 
-  /* LAYOUT */
-  .main { padding: 24px 32px; max-width: 1400px; margin: 0 auto; }
+/* KPI */
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px 20px;position:relative;overflow:hidden;transition:all .2s}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:10px 10px 0 0}
+.kpi.c-green::before{background:var(--green)} .kpi.c-red::before{background:var(--red)}
+.kpi.c-blue::before{background:var(--blue)} .kpi.c-purple::before{background:var(--purple)}
+.kpi-label{font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:6px}
+.kpi-value{font-size:26px;font-weight:700;line-height:1;margin-bottom:3px}
+.kpi.c-green .kpi-value{color:var(--green)} .kpi.c-red .kpi-value{color:var(--red)}
+.kpi.c-blue .kpi-value{color:var(--blue)} .kpi.c-purple .kpi-value{color:var(--purple)}
+.kpi-sub{font-size:11px;color:var(--muted)}
 
-  /* KPI CARDS */
-  .kpis {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 16px;
-    margin-bottom: 24px;
-  }
-  .kpi {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 20px;
-    position: relative;
-    overflow: hidden;
-    transition: border-color 0.2s;
-  }
-  .kpi:hover { border-color: #484f58; }
-  .kpi::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 3px;
-    border-radius: 12px 12px 0 0;
-  }
-  .kpi.green::before { background: var(--teal); }
-  .kpi.red::before   { background: var(--red); }
-  .kpi.blue::before  { background: var(--blue); }
-  .kpi.purple::before{ background: var(--purple); }
+/* GRID */
+.row{display:grid;gap:14px;margin-bottom:14px}
+.row.col-3-2{grid-template-columns:1fr 1fr 1fr}
+.row.col-2{grid-template-columns:1fr 1fr}
+.row.col-full{grid-template-columns:1fr}
 
-  .kpi-label {
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    color: var(--text-muted);
-    margin-bottom: 8px;
-  }
-  .kpi-value {
-    font-size: 28px;
-    font-weight: 700;
-    line-height: 1;
-    margin-bottom: 4px;
-  }
-  .kpi.green .kpi-value { color: var(--teal); }
-  .kpi.red   .kpi-value { color: var(--red); }
-  .kpi.blue  .kpi-value { color: var(--blue); }
-  .kpi.purple .kpi-value { color: var(--purple); }
-  .kpi-sub {
-    font-size: 11px;
-    color: var(--text-muted);
-  }
+/* CARD */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px 20px;transition:border-color .2s}
+.card:hover{border-color:#484f58}
+.card-title{font-size:13px;font-weight:600;margin-bottom:2px}
+.card-sub{font-size:11px;color:var(--muted);margin-bottom:14px}
+.chart-wrap{position:relative}
 
-  /* GRID */
-  .grid-2 {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-    margin-bottom: 16px;
-  }
-  .grid-3 {
-    display: grid;
-    grid-template-columns: 2fr 1fr;
-    gap: 16px;
-    margin-bottom: 16px;
-  }
+/* NET BARS */
+.net-list{display:flex;flex-direction:column;gap:10px;margin-top:4px}
+.net-row{display:flex;align-items:center;gap:10px;cursor:pointer;border-radius:6px;padding:4px 6px;transition:background .15s}
+.net-row:hover{background:var(--surface2)}
+.net-row.selected{background:rgba(56,139,253,0.12);outline:1px solid rgba(56,139,253,0.3);border-radius:6px}
+.net-month{width:28px;font-size:11px;color:var(--muted);flex-shrink:0}
+.net-track{flex:1;height:8px;background:var(--surface2);border-radius:4px;overflow:hidden}
+.net-fill{height:100%;border-radius:4px;transition:width .4s}
+.net-val{width:62px;font-size:11px;text-align:right;font-weight:600;flex-shrink:0}
 
-  /* CARD */
-  .card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 20px;
-    transition: border-color 0.2s;
-  }
-  .card:hover { border-color: #484f58; }
-  .card-title {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--text);
-    margin-bottom: 4px;
-  }
-  .card-sub {
-    font-size: 11px;
-    color: var(--text-muted);
-    margin-bottom: 16px;
-  }
-  .chart-wrap {
-    position: relative;
-  }
+/* DONUT + LIST */
+.donut-wrap{display:flex;gap:20px;align-items:flex-start}
+.cat-list{flex:1;display:flex;flex-direction:column;gap:8px}
+.cat-row{display:flex;align-items:center;gap:8px;cursor:pointer;padding:4px 6px;border-radius:6px;transition:background .15s}
+.cat-row:hover{background:var(--surface2)}
+.cat-row.active{background:rgba(56,139,253,0.12);outline:1px solid rgba(56,139,253,0.3)}
+.cat-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.cat-name{flex:1;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cat-track{width:80px;height:5px;background:var(--surface2);border-radius:3px;overflow:hidden;flex-shrink:0}
+.cat-fill{height:100%;border-radius:3px}
+.cat-val{width:60px;font-size:11px;text-align:right;color:var(--muted);flex-shrink:0}
 
-  /* NET INDICATOR */
-  .net-bar {
-    margin-top: 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-  .net-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  .net-month {
-    width: 56px;
-    font-size: 11px;
-    color: var(--text-muted);
-    flex-shrink: 0;
-  }
-  .net-track {
-    flex: 1;
-    height: 8px;
-    background: var(--surface2);
-    border-radius: 4px;
-    overflow: hidden;
-    position: relative;
-  }
-  .net-fill {
-    height: 100%;
-    border-radius: 4px;
-    transition: width 0.5s;
-  }
-  .net-val {
-    width: 70px;
-    font-size: 11px;
-    text-align: right;
-    flex-shrink: 0;
-    font-weight: 600;
-  }
+/* DETAIL BAR CHART */
+.detail-title{font-size:12px;color:var(--muted);margin-bottom:10px}
+.detail-list{display:flex;flex-direction:column;gap:8px}
+.detail-row{display:flex;align-items:center;gap:10px}
+.detail-name{width:160px;font-size:11px;color:var(--text);flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.detail-track{flex:1;height:18px;background:var(--surface2);border-radius:4px;overflow:hidden;position:relative}
+.detail-fill{height:100%;border-radius:4px;transition:width .4s}
+.detail-label{position:absolute;right:6px;top:50%;transform:translateY(-50%);font-size:10px;font-weight:600;color:var(--text)}
+.detail-val{width:64px;font-size:11px;text-align:right;color:var(--muted);flex-shrink:0}
 
-  /* CATEGORY LIST */
-  .cat-list {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin-top: 4px;
-  }
-  .cat-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  .cat-dot {
-    width: 10px; height: 10px;
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
-  .cat-name {
-    flex: 1;
-    font-size: 12px;
-    color: var(--text);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .cat-track {
-    width: 100px;
-    height: 6px;
-    background: var(--surface2);
-    border-radius: 3px;
-    overflow: hidden;
-  }
-  .cat-fill { height: 100%; border-radius: 3px; }
-  .cat-val {
-    width: 64px;
-    font-size: 11px;
-    text-align: right;
-    color: var(--text-muted);
-    flex-shrink: 0;
-  }
+/* EMPTY STATE */
+.empty{text-align:center;color:var(--muted);padding:40px;font-size:13px}
 
-  /* FOOTER */
-  .footer {
-    border-top: 1px solid var(--border);
-    padding: 16px 32px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    color: var(--text-muted);
-    font-size: 11px;
-    margin-top: 8px;
-  }
-  .footer span { opacity: 0.6; }
-
-  /* SAVINGS BADGE */
-  .badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 10px;
-    padding: 2px 8px;
-    border-radius: 10px;
-    font-weight: 600;
-    margin-left: 8px;
-    vertical-align: middle;
-  }
-  .badge-green { background: rgba(57,211,83,0.15); color: var(--teal); }
-  .badge-red   { background: rgba(248,81,73,0.15);  color: var(--red); }
-
-  @media (max-width: 900px) {
-    .kpis { grid-template-columns: 1fr 1fr; }
-    .grid-2, .grid-3 { grid-template-columns: 1fr; }
-    .main { padding: 16px; }
-    .header { padding: 16px; }
-  }
+.footer{border-top:1px solid var(--border);padding:14px 28px;display:flex;justify-content:space-between;color:var(--muted);font-size:11px;margin-top:6px}
 </style>
 </head>
 <body>
 
 <div class="header">
-  <div class="header-left">
+  <div>
     <h1>Семейный бюджет</h1>
     <p>Январь — Май 2026 · Жандос & Анель</p>
   </div>
-  <div class="header-right">
-    <div class="dot"></div>
-    Обновлено: июнь 2026
-  </div>
+  <div class="badge-live"><div class="dot-live"></div>Обновлено: июнь 2026</div>
+</div>
+
+<div class="filter-bar">
+  <span>Фильтр:</span>
+  <span class="filter-tag" id="monthTag"></span>
+  <span class="filter-tag" id="catTag"></span>
+  <span style="margin-left:auto;opacity:.5">Нажмите на месяц (левый график) или категорию (правый) для фильтрации</span>
 </div>
 
 <div class="main">
 
-  <!-- KPI CARDS -->
+  <!-- KPI -->
   <div class="kpis">
-    <div class="kpi green">
+    <div class="kpi c-green">
       <div class="kpi-label">Суммарно доходов</div>
-      <div class="kpi-value">17 475</div>
-      <div class="kpi-sub">тыс. тенге · янв–май 2026</div>
+      <div class="kpi-value" id="kpiInc">17 475</div>
+      <div class="kpi-sub">тыс. тенге</div>
     </div>
-    <div class="kpi red">
+    <div class="kpi c-red">
       <div class="kpi-label">Суммарно расходов</div>
-      <div class="kpi-value">17 265</div>
-      <div class="kpi-sub">тыс. тенге · без межсчётных</div>
+      <div class="kpi-value" id="kpiExp">17 265</div>
+      <div class="kpi-sub">тыс. тенге</div>
     </div>
-    <div class="kpi blue">
+    <div class="kpi c-blue">
       <div class="kpi-label">Чистая позиция</div>
-      <div class="kpi-value">+210</div>
-      <div class="kpi-sub">тыс. тенге · за период</div>
+      <div class="kpi-value" id="kpiNet">+210</div>
+      <div class="kpi-sub" id="kpiNetSub">тыс. тенге за период</div>
     </div>
-    <div class="kpi purple">
-      <div class="kpi-label">Ср. расходы / месяц</div>
-      <div class="kpi-value">3 453</div>
-      <div class="kpi-sub">тыс. тенге · за 5 месяцев</div>
+    <div class="kpi c-purple">
+      <div class="kpi-label">Ср. расходы / мес</div>
+      <div class="kpi-value" id="kpiAvg">3 453</div>
+      <div class="kpi-sub">тыс. тенге</div>
     </div>
   </div>
 
-  <!-- ROW 1: INCOME vs EXPENSES + NET -->
-  <div class="grid-3">
-    <div class="card">
-      <div class="card-title">Доходы vs Расходы</div>
-      <div class="card-sub">тыс. тенге в месяц (без межсчётных переводов)</div>
-      <div class="chart-wrap" style="height:240px">
-        <canvas id="incExpChart"></canvas>
-      </div>
+  <!-- ROW 1: Income stacked + Net bars -->
+  <div class="row col-3-2">
+    <div class="card" style="grid-column: span 2">
+      <div class="card-title">Структура & динамика доходов</div>
+      <div class="card-sub">тыс. тенге в месяц · Зарплата, Проекты, Прочее</div>
+      <div class="chart-wrap" style="height:230px"><canvas id="incomeChart"></canvas></div>
     </div>
-
     <div class="card">
       <div class="card-title">Профицит / дефицит</div>
-      <div class="card-sub">доходы минус расходы, тыс. тенге</div>
-      <div class="net-bar" id="netBar"></div>
+      <div class="card-sub">нажмите на месяц для фильтрации</div>
+      <div class="net-list" id="netList"></div>
     </div>
   </div>
 
-  <!-- ROW 2: STACKED + DONUT -->
-  <div class="grid-2">
+  <!-- ROW 2: Stacked expenses + Donut -->
+  <div class="row col-2">
     <div class="card">
-      <div class="card-title">Расходы по категориям по месяцам</div>
-      <div class="card-sub">тыс. тенге · топ-9 категорий</div>
-      <div class="chart-wrap" style="height:260px">
-        <canvas id="stackedChart"></canvas>
-      </div>
+      <div class="card-title">Расходы по категориям</div>
+      <div class="card-sub" id="stackedSub">тыс. тенге по месяцам · топ-9 категорий</div>
+      <div class="chart-wrap" style="height:260px"><canvas id="stackedChart"></canvas></div>
     </div>
-
     <div class="card">
       <div class="card-title">Структура расходов</div>
-      <div class="card-sub">суммарно за янв–май 2026, тыс. тенге</div>
-      <div style="display:flex; gap:20px; align-items:center; margin-top:4px">
-        <div class="chart-wrap" style="height:220px; width:220px; flex-shrink:0">
-          <canvas id="donutChart"></canvas>
-        </div>
-        <div class="cat-list" id="catList" style="flex:1"></div>
+      <div class="card-sub">нажмите на категорию для детализации</div>
+      <div class="donut-wrap">
+        <div class="chart-wrap" style="height:210px;width:200px;flex-shrink:0"><canvas id="donutChart"></canvas></div>
+        <div class="cat-list" id="catList"></div>
       </div>
     </div>
   </div>
 
-  <!-- ROW 3: ПИТАНИЕ LINE -->
-  <div class="card" style="margin-bottom:16px">
-    <div class="card-title">Расходы на питание по месяцам</div>
-    <div class="card-sub">тыс. тенге · стабильная статья семейного бюджета</div>
-    <div class="chart-wrap" style="height:160px">
-      <canvas id="foodChart"></canvas>
+  <!-- ROW 3: Detail chart -->
+  <div class="row col-full">
+    <div class="card">
+      <div class="card-title" id="detailTitle">Детализация расходов</div>
+      <div class="card-sub">выберите категорию в диаграмме выше</div>
+      <div id="detailContent"><div class="empty">← Нажмите на категорию в «Структуре расходов»</div></div>
     </div>
   </div>
 
@@ -371,187 +181,285 @@
 
 <div class="footer">
   <span>Семейный бюджет · Жандос & Анель · 2026</span>
-  <span>Данные: Kaspi Gold, BCC Travel, BCC Deposit, Freedom Super, Отбасы, Kaspi Deposit</span>
+  <span>Kaspi Gold · BCC Travel · BCC Deposit · Freedom Super · Отбасы · Kaspi Deposit</span>
 </div>
 
 <script>
-const DATA = {"months":["Январь","Февраль","Март","Апрель","Май"],"income":[3290.9,3219.9,2916.3,2759.2,5288.3],"expenses":[2440.2,2743.8,2800.2,3755.0,5525.8],"net":[850.7,476.1,116.1,-995.8,-237.5],"cats":["Питание","Крупные покупки","Дом и быт","Одежда и внешний вид","Отдых и досуг","Подарки","Транспорт","Личные расходы","Здоровье"],"cat_totals":[2499.5,1031.2,911.3,740.8,619.6,541.2,488.5,255.6,230.8],"cat_by_month":{"Питание":[453.6,519.3,510.1,510.6,505.8],"Крупные покупки":[475.5,187.6,100.8,175.8,91.6],"Дом и быт":[347.4,245.5,105.4,116.6,96.4],"Одежда и внешний вид":[74.2,232.5,23.1,70.8,340.2],"Отдых и досуг":[131.7,89.5,253.5,91.7,53.1],"Подарки":[21.9,231.8,169.8,60.7,57.0],"Транспорт":[54.9,83.6,82.3,178.2,89.5],"Личные расходы":[13.3,25.5,112.1,88.2,16.4],"Здоровье":[9.0,19.2,27.3,74.0,101.3]}};
+const D = {"months":["2026-01","2026-02","2026-03","2026-04","2026-05"],"month_labels":["Янв","Фев","Мар","Апр","Май"],"income_cats":{"Зарплата":[1843.1,1595.5,1807.0,2039.3,2926.8],"Проекты":[800.0,1000.0,900.0,200.0,1000.0],"Прочее":[647.8,624.4,209.3,519.9,1361.6]},"exp_cats":["Питание","Крупные покупки","Дом и быт","Одежда и внешний вид","Отдых и досуг","Подарки","Транспорт","Личные расходы","Здоровье"],"exp_by_month":{"Питание":[453.6,519.3,510.1,510.6,505.8],"Крупные покупки":[475.5,187.6,100.8,175.8,91.6],"Дом и быт":[347.4,245.5,105.4,116.6,96.4],"Одежда и внешний вид":[74.2,232.5,23.1,70.8,340.2],"Отдых и досуг":[131.7,89.5,253.5,91.7,53.1],"Подарки":[21.9,231.8,169.8,60.7,57.0],"Транспорт":[54.9,83.6,82.3,178.2,89.5],"Личные расходы":[13.3,25.5,112.1,88.2,16.4],"Здоровье":[9.0,19.2,27.3,74.0,101.3]},"exp_totals":{"Питание":2499.5,"Крупные покупки":1031.2,"Дом и быт":911.3,"Одежда и внешний вид":740.8,"Отдых и досуг":619.6,"Подарки":541.2,"Транспорт":488.5,"Личные расходы":255.6,"Здоровье":230.8},"cat_detail":{"Питание":{"Продукты (дом)":1320.2,"Кафе и рестораны":485.7,"Доставка еды":352.1,"Обеды вне дома (работа)":327.4,"разобрать":8.5,"Прочее":5.7},"Крупные покупки":{"Мебель (крупная)":432.8,"Ремонт":300.7,"Техника":297.7},"Дом и быт":{"Мебель":437.5,"Техника для дома":269.5,"Хозтовары":204.3},"Одежда и внешний вид":{"Одежда":453.5,"Косметика и уход":287.2},"Отдых и досуг":{"Покер":348.0,"Подарки":168.5,"Развлечения":103.1},"Подарки":{"Родственникам":330.3,"ДР коллег":158.6,"ДР друзей":33.3,"Благотворительность":19.0},"Транспорт":{"Такси":354.1,"Оформление авто":76.7,"Обслуживание авто":37.6,"ГСМ":13.0,"Прочее":6.9},"Личные расходы":{"Анель":153.0,"Жандос":49.4,"Арсен":37.1,"разобрать":16.0},"Здоровье":{"Врачи / анализы":215.5,"Аптека":15.3}},"kpi_by_month":{"2026-01":{"inc":3290.9,"exp":2440.2,"net":850.7},"2026-02":{"inc":3219.9,"exp":2743.8,"net":476.1},"2026-03":{"inc":2916.3,"exp":2800.2,"net":116.1},"2026-04":{"inc":2759.2,"exp":3755.0,"net":-995.8},"2026-05":{"inc":5288.3,"exp":5525.8,"net":-237.5}},"kpi_total":{"inc":17475,"exp":17265,"net":210,"avg":3453}};
 
 const COLORS = ['#388bfd','#bc8cff','#39d353','#f0883e','#56d4dd','#f85149','#d29922','#ff7b72','#a5d6ff'];
+const INC_COLORS = { 'Зарплата':'#39d353', 'Проекты':'#388bfd', 'Прочее':'#bc8cff' };
 
-const defaults = {
-  color: '#e6edf3',
-  plugins: {
-    legend: {
-      labels: { color: '#7d8590', font: { size: 11 }, boxWidth: 12, padding: 12 }
-    },
-    tooltip: {
-      backgroundColor: '#1c2333',
-      titleColor: '#e6edf3',
-      bodyColor: '#7d8590',
-      borderColor: '#30363d',
-      borderWidth: 1,
-      padding: 10,
-    }
-  },
-  scales: {
-    x: {
-      ticks: { color: '#7d8590', font: { size: 11 } },
-      grid: { color: '#21262d' },
-      border: { color: '#30363d' }
-    },
-    y: {
-      ticks: { color: '#7d8590', font: { size: 11 } },
-      grid: { color: '#21262d' },
-      border: { color: '#30363d' }
-    }
-  }
+let selectedMonth = null; // null = все
+let selectedCat   = null; // null = все
+
+// ============================================================
+// CHART DEFAULTS
+// ============================================================
+const TIP = {
+  backgroundColor:'#1c2333', titleColor:'#e6edf3', bodyColor:'#7d8590',
+  borderColor:'#30363d', borderWidth:1, padding:10
+};
+const AXES = {
+  x:{ticks:{color:'#7d8590',font:{size:11}},grid:{color:'#21262d'},border:{color:'#30363d'}},
+  y:{ticks:{color:'#7d8590',font:{size:11}},grid:{color:'#21262d'},border:{color:'#30363d'}}
 };
 
-// ---- Income vs Expenses ----
-new Chart(document.getElementById('incExpChart'), {
+// ============================================================
+// INCOME CHART (stacked bar)
+// ============================================================
+const incomeChart = new Chart(document.getElementById('incomeChart'), {
   type: 'bar',
   data: {
-    labels: DATA.months,
-    datasets: [
-      {
-        label: 'Доходы',
-        data: DATA.income,
-        backgroundColor: 'rgba(57,211,83,0.25)',
-        borderColor: '#39d353',
-        borderWidth: 2,
-        borderRadius: 6,
-      },
-      {
-        label: 'Расходы',
-        data: DATA.expenses,
-        backgroundColor: 'rgba(248,81,73,0.2)',
-        borderColor: '#f85149',
-        borderWidth: 2,
-        borderRadius: 6,
-      }
-    ]
-  },
-  options: {
-    ...defaults,
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: { ...defaults.plugins, legend: { ...defaults.plugins.legend, position: 'top' } },
-    scales: { ...defaults.scales, y: { ...defaults.scales.y, ticks: { ...defaults.scales.y.ticks, callback: v => v.toLocaleString('ru') } } }
-  }
-});
-
-// ---- Net bars ----
-const netMax = Math.max(...DATA.net.map(Math.abs));
-const netEl = document.getElementById('netBar');
-DATA.months.forEach((m, i) => {
-  const v = DATA.net[i];
-  const pct = Math.abs(v) / netMax * 100;
-  const pos = v >= 0;
-  const color = pos ? '#39d353' : '#f85149';
-  netEl.innerHTML += `
-    <div class="net-row">
-      <div class="net-month">${m.slice(0,3)}</div>
-      <div class="net-track">
-        <div class="net-fill" style="width:${pct}%;background:${color}"></div>
-      </div>
-      <div class="net-val" style="color:${color}">${pos?'+':''}${v.toLocaleString('ru', {maximumFractionDigits:0})}</div>
-    </div>`;
-});
-
-// ---- Stacked bar ----
-new Chart(document.getElementById('stackedChart'), {
-  type: 'bar',
-  data: {
-    labels: DATA.months,
-    datasets: DATA.cats.map((cat, i) => ({
-      label: cat,
-      data: DATA.cat_by_month[cat],
-      backgroundColor: COLORS[i] + '99',
-      borderColor: COLORS[i],
-      borderWidth: 1,
-      borderRadius: 3,
+    labels: D.month_labels,
+    datasets: ['Зарплата','Проекты','Прочее'].map(k => ({
+      label: k,
+      data: D.income_cats[k],
+      backgroundColor: INC_COLORS[k] + '99',
+      borderColor: INC_COLORS[k],
+      borderWidth: 2,
+      borderRadius: 4,
     }))
   },
   options: {
-    ...defaults,
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: { ...defaults.plugins, legend: { ...defaults.plugins.legend, position: 'bottom' } },
-    scales: {
-      ...defaults.scales,
-      x: { ...defaults.scales.x, stacked: true },
-      y: { ...defaults.scales.y, stacked: true, ticks: { ...defaults.scales.y.ticks, callback: v => v.toLocaleString('ru') } }
+    responsive:true, maintainAspectRatio:false,
+    plugins:{ legend:{labels:{color:'#7d8590',font:{size:11},boxWidth:11,padding:10},position:'top'}, tooltip:{...TIP} },
+    scales:{ x:{...AXES.x, stacked:true}, y:{...AXES.y, stacked:true,
+      ticks:{...AXES.y.ticks, callback:v=>v.toLocaleString('ru')}} }
+  }
+});
+
+// ============================================================
+// NET BARS (clickable month filter)
+// ============================================================
+const netMax = Math.max(...D.months.map(m => Math.abs(D.kpi_by_month[m].net)));
+const netEl = document.getElementById('netList');
+
+function buildNetBars() {
+  netEl.innerHTML = '';
+  D.months.forEach((m, i) => {
+    const v = D.kpi_by_month[m].net;
+    const pct = Math.abs(v) / netMax * 100;
+    const color = v >= 0 ? '#39d353' : '#f85149';
+    const sel = selectedMonth === m ? 'selected' : '';
+    netEl.innerHTML += `
+      <div class="net-row ${sel}" data-month="${m}" onclick="selectMonth('${m}')">
+        <div class="net-month">${D.month_labels[i]}</div>
+        <div class="net-track"><div class="net-fill" style="width:${pct}%;background:${color}"></div></div>
+        <div class="net-val" style="color:${color}">${v>=0?'+':''}${v.toLocaleString('ru',{maximumFractionDigits:0})}</div>
+      </div>`;
+  });
+}
+buildNetBars();
+
+// ============================================================
+// STACKED EXPENSES CHART
+// ============================================================
+function getStackedData() {
+  const labels = selectedMonth ? [D.month_labels[D.months.indexOf(selectedMonth)]] : D.month_labels;
+  const mi = selectedMonth ? [D.months.indexOf(selectedMonth)] : D.months.map((_,i)=>i);
+  const cats = selectedCat ? [selectedCat] : D.exp_cats;
+  return {
+    labels,
+    datasets: cats.map((cat, ci) => {
+      const color = COLORS[D.exp_cats.indexOf(cat)];
+      return {
+        label: cat,
+        data: mi.map(i => D.exp_by_month[cat][i]),
+        backgroundColor: color + '99',
+        borderColor: color,
+        borderWidth: 1,
+        borderRadius: 4,
+      };
+    })
+  };
+}
+
+const stackedChart = new Chart(document.getElementById('stackedChart'), {
+  type: 'bar',
+  data: getStackedData(),
+  options: {
+    responsive:true, maintainAspectRatio:false,
+    plugins:{ legend:{labels:{color:'#7d8590',font:{size:10},boxWidth:10,padding:8},position:'bottom'}, tooltip:{...TIP} },
+    scales:{
+      x:{...AXES.x, stacked:true},
+      y:{...AXES.y, stacked:true, ticks:{...AXES.y.ticks, callback:v=>v.toLocaleString('ru')}}
     }
   }
 });
 
-// ---- Donut ----
-new Chart(document.getElementById('donutChart'), {
-  type: 'doughnut',
-  data: {
-    labels: DATA.cats,
-    datasets: [{
-      data: DATA.cat_totals,
-      backgroundColor: COLORS.map(c => c + 'cc'),
-      borderColor: '#161b22',
-      borderWidth: 3,
-      hoverOffset: 8,
-    }]
-  },
-  options: {
-    responsive: true,
-    maintainAspectRatio: false,
-    cutout: '62%',
-    plugins: {
-      legend: { display: false },
-      tooltip: { ...defaults.plugins.tooltip,
-        callbacks: { label: ctx => ` ${ctx.label}: ${ctx.parsed.toLocaleString('ru')} тыс.` }
-      }
+// ============================================================
+// DONUT CHART
+// ============================================================
+function getDonutData() {
+  const cats = D.exp_cats;
+  const vals = cats.map(c => {
+    if (selectedMonth) {
+      const mi = D.months.indexOf(selectedMonth);
+      return D.exp_by_month[c][mi];
+    }
+    return D.exp_totals[c];
+  });
+  return { labels: cats, datasets:[{
+    data: vals,
+    backgroundColor: COLORS.map(c=>c+'cc'),
+    borderColor:'#161b22', borderWidth:3, hoverOffset:8
+  }]};
+}
+
+const donutChart = new Chart(document.getElementById('donutChart'), {
+  type:'doughnut',
+  data: getDonutData(),
+  options:{
+    responsive:true, maintainAspectRatio:false, cutout:'62%',
+    plugins:{
+      legend:{display:false},
+      tooltip:{...TIP, callbacks:{label:ctx=>` ${ctx.label}: ${ctx.parsed.toLocaleString('ru',{maximumFractionDigits:0})} тыс.`}}
+    },
+    onClick(evt, els) {
+      if (!els.length) return;
+      const cat = D.exp_cats[els[0].index];
+      selectCat(cat === selectedCat ? null : cat);
     }
   }
 });
 
-// ---- Category list ----
-const maxCat = DATA.cat_totals[0];
-const catEl = document.getElementById('catList');
-DATA.cats.forEach((cat, i) => {
-  const pct = DATA.cat_totals[i] / maxCat * 100;
-  catEl.innerHTML += `
-    <div class="cat-row">
-      <div class="cat-dot" style="background:${COLORS[i]}"></div>
-      <div class="cat-name">${cat}</div>
-      <div class="cat-track"><div class="cat-fill" style="width:${pct}%;background:${COLORS[i]}"></div></div>
-      <div class="cat-val">${DATA.cat_totals[i].toLocaleString('ru')} тыс.</div>
-    </div>`;
-});
+// ============================================================
+// CAT LIST (right side of donut)
+// ============================================================
+function buildCatList() {
+  const el = document.getElementById('catList');
+  el.innerHTML = '';
+  const vals = D.exp_cats.map(c => {
+    if (selectedMonth) return D.exp_by_month[c][D.months.indexOf(selectedMonth)];
+    return D.exp_totals[c];
+  });
+  const maxV = Math.max(...vals);
+  D.exp_cats.forEach((cat, i) => {
+    const pct = vals[i] / maxV * 100;
+    const active = selectedCat === cat ? 'active' : '';
+    el.innerHTML += `
+      <div class="cat-row ${active}" onclick="selectCat('${cat}')">
+        <div class="cat-dot" style="background:${COLORS[i]}"></div>
+        <div class="cat-name">${cat}</div>
+        <div class="cat-track"><div class="cat-fill" style="width:${pct}%;background:${COLORS[i]}"></div></div>
+        <div class="cat-val">${vals[i].toLocaleString('ru',{maximumFractionDigits:0})}</div>
+      </div>`;
+  });
+}
+buildCatList();
 
-// ---- Food line ----
-new Chart(document.getElementById('foodChart'), {
-  type: 'line',
-  data: {
-    labels: DATA.months,
-    datasets: [{
-      label: 'Питание',
-      data: DATA.cat_by_month['Питание'],
-      borderColor: '#388bfd',
-      backgroundColor: 'rgba(56,139,253,0.1)',
-      fill: true,
-      tension: 0.4,
-      pointBackgroundColor: '#388bfd',
-      pointBorderColor: '#161b22',
-      pointBorderWidth: 2,
-      pointRadius: 5,
-    }]
-  },
-  options: {
-    ...defaults,
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: { ...defaults.plugins, legend: { display: false } },
-    scales: { ...defaults.scales, y: { ...defaults.scales.y, ticks: { ...defaults.scales.y.ticks, callback: v => v + ' тыс.' } } }
+// ============================================================
+// DETAIL CHART
+// ============================================================
+function buildDetail(cat) {
+  const title = document.getElementById('detailTitle');
+  const content = document.getElementById('detailContent');
+  if (!cat) {
+    title.textContent = 'Детализация расходов';
+    content.innerHTML = '<div class="empty">← Нажмите на категорию в «Структуре расходов»</div>';
+    return;
   }
-});
+  title.textContent = `Детализация: ${cat}`;
+  const items = D.cat_detail[cat];
+  const entries = Object.entries(items).sort((a,b)=>b[1]-a[1]);
+  const maxV = entries[0][1];
+  const catColor = COLORS[D.exp_cats.indexOf(cat)];
+  let html = '<div class="detail-list">';
+  entries.forEach(([name, val]) => {
+    const pct = val / maxV * 100;
+    html += `
+      <div class="detail-row">
+        <div class="detail-name">${name}</div>
+        <div class="detail-track">
+          <div class="detail-fill" style="width:${pct}%;background:${catColor}99"></div>
+          <span class="detail-label" style="color:${catColor}">${val.toLocaleString('ru',{maximumFractionDigits:0})}</span>
+        </div>
+        <div class="detail-val">${val.toLocaleString('ru',{maximumFractionDigits:0})} тыс.</div>
+      </div>`;
+  });
+  html += '</div>';
+  content.innerHTML = html;
+}
+
+// ============================================================
+// KPI UPDATE
+// ============================================================
+function updateKPI() {
+  const t = document.getElementById;
+  if (selectedMonth) {
+    const kpi = D.kpi_by_month[selectedMonth];
+    document.getElementById('kpiInc').textContent = kpi.inc.toLocaleString('ru',{maximumFractionDigits:0});
+    document.getElementById('kpiExp').textContent = kpi.exp.toLocaleString('ru',{maximumFractionDigits:0});
+    const net = kpi.net;
+    document.getElementById('kpiNet').textContent = (net>=0?'+':'')+net.toLocaleString('ru',{maximumFractionDigits:0});
+    document.getElementById('kpiAvg').textContent = kpi.exp.toLocaleString('ru',{maximumFractionDigits:0});
+    document.getElementById('kpiNetSub').textContent = 'тыс. тенге за месяц';
+  } else {
+    const kpi = D.kpi_total;
+    document.getElementById('kpiInc').textContent = kpi.inc.toLocaleString('ru');
+    document.getElementById('kpiExp').textContent = kpi.exp.toLocaleString('ru');
+    document.getElementById('kpiNet').textContent = (kpi.net>=0?'+':'')+kpi.net.toLocaleString('ru');
+    document.getElementById('kpiAvg').textContent = kpi.avg.toLocaleString('ru');
+    document.getElementById('kpiNetSub').textContent = 'тыс. тенге за период';
+  }
+}
+
+// ============================================================
+// FILTER TAGS
+// ============================================================
+function updateTags() {
+  const mTag = document.getElementById('monthTag');
+  const cTag = document.getElementById('catTag');
+  if (selectedMonth) {
+    const lbl = D.month_labels[D.months.indexOf(selectedMonth)];
+    mTag.className = 'filter-tag active';
+    mTag.innerHTML = `📅 ${lbl} <span class="x" onclick="selectMonth(null)">✕</span>`;
+  } else {
+    mTag.className = 'filter-tag';
+  }
+  if (selectedCat) {
+    cTag.className = 'filter-tag active';
+    cTag.innerHTML = `📂 ${selectedCat} <span class="x" onclick="selectCat(null)">✕</span>`;
+  } else {
+    cTag.className = 'filter-tag';
+  }
+}
+
+// ============================================================
+// SELECT ACTIONS
+// ============================================================
+function selectMonth(m) {
+  selectedMonth = selectedMonth === m ? null : m;
+  buildNetBars();
+  updateKPI();
+  updateTags();
+  // Refresh stacked chart
+  const sd = getStackedData();
+  stackedChart.data.labels = sd.labels;
+  stackedChart.data.datasets = sd.datasets;
+  stackedChart.update();
+  // Refresh donut
+  const dd = getDonutData();
+  donutChart.data.datasets[0].data = dd.datasets[0].data;
+  donutChart.update();
+  buildCatList();
+  // Update stacked sub
+  document.getElementById('stackedSub').textContent = selectedMonth
+    ? `тыс. тенге · ${D.month_labels[D.months.indexOf(selectedMonth)]}`
+    : 'тыс. тенге по месяцам · топ-9 категорий';
+}
+
+function selectCat(cat) {
+  selectedCat = selectedCat === cat ? null : cat;
+  updateTags();
+  buildCatList();
+  buildDetail(selectedCat);
+  // Update stacked
+  const sd = getStackedData();
+  stackedChart.data.datasets = sd.datasets;
+  stackedChart.update();
+}
 </script>
 </body>
 </html>
