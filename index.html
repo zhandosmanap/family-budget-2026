@@ -88,6 +88,13 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 .detail-label{position:absolute;right:6px;top:50%;transform:translateY(-50%);font-size:10px;font-weight:600;color:var(--text)}
 .detail-val{width:64px;font-size:11px;text-align:right;color:var(--muted);flex-shrink:0}
 
+/* DETAIL TOGGLE */
+.detail-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:2px}
+.toggle-group{display:flex;gap:2px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:2px}
+.toggle-btn{font-size:11px;padding:3px 10px;border-radius:6px;cursor:pointer;color:var(--muted);transition:all .15s;border:none;background:transparent;font-family:inherit}
+.toggle-btn.active{background:var(--surface);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.4)}
+.toggle-btn:hover:not(.active){color:var(--text)}
+
 /* EMPTY STATE */
 .empty{text-align:center;color:var(--muted);padding:40px;font-size:13px}
 
@@ -171,7 +178,13 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
   <!-- ROW 3: Detail chart -->
   <div class="row col-full">
     <div class="card">
-      <div class="card-title" id="detailTitle">Детализация расходов</div>
+      <div class="detail-header">
+        <div class="card-title" id="detailTitle">Детализация расходов</div>
+        <div class="toggle-group" id="detailToggle" style="display:none">
+          <button class="toggle-btn active" id="btnTotal" onclick="setDetailMode('total')">Итого</button>
+          <button class="toggle-btn" id="btnAvg" onclick="setDetailMode('avg')">Среднее / мес</button>
+        </div>
+      </div>
       <div class="card-sub">выберите категорию в диаграмме выше</div>
       <div id="detailContent"><div class="empty">← Нажмите на категорию в «Структуре расходов»</div></div>
     </div>
@@ -192,6 +205,7 @@ const INC_COLORS = { 'Зарплата':'#39d353', 'Проекты':'#388bfd', '
 
 let selectedMonth = null; // null = все
 let selectedCat   = null; // null = все
+let detailMode    = 'total'; // 'total' | 'avg'
 
 // ============================================================
 // CHART DEFAULTS
@@ -335,13 +349,15 @@ function buildCatList() {
     return D.exp_totals[c];
   });
   const maxV = Math.max(...vals);
+  const totalV = vals.reduce((a, b) => a + b, 0);
   D.exp_cats.forEach((cat, i) => {
     const pct = vals[i] / maxV * 100;
+    const sharePct = totalV > 0 ? Math.round(vals[i] / totalV * 100) : 0;
     const active = selectedCat === cat ? 'active' : '';
     el.innerHTML += `
       <div class="cat-row ${active}" onclick="selectCat('${cat}')">
         <div class="cat-dot" style="background:${COLORS[i]}"></div>
-        <div class="cat-name">${cat}</div>
+        <div class="cat-name">${cat} <span style="color:var(--muted);font-size:10px">(${sharePct}%)</span></div>
         <div class="cat-track"><div class="cat-fill" style="width:${pct}%;background:${COLORS[i]}"></div></div>
         <div class="cat-val">${vals[i].toLocaleString('ru',{maximumFractionDigits:0})}</div>
       </div>`;
@@ -350,32 +366,49 @@ function buildCatList() {
 buildCatList();
 
 // ============================================================
+// DETAIL MODE TOGGLE
+// ============================================================
+function setDetailMode(mode) {
+  detailMode = mode;
+  document.getElementById('btnTotal').className = 'toggle-btn' + (mode === 'total' ? ' active' : '');
+  document.getElementById('btnAvg').className   = 'toggle-btn' + (mode === 'avg'   ? ' active' : '');
+  if (selectedCat) buildDetail(selectedCat);
+}
+
+// ============================================================
 // DETAIL CHART
 // ============================================================
 function buildDetail(cat) {
   const title = document.getElementById('detailTitle');
   const content = document.getElementById('detailContent');
+  const toggle = document.getElementById('detailToggle');
   if (!cat) {
     title.textContent = 'Детализация расходов';
+    toggle.style.display = 'none';
     content.innerHTML = '<div class="empty">← Нажмите на категорию в «Структуре расходов»</div>';
     return;
   }
   title.textContent = `Детализация: ${cat}`;
+  toggle.style.display = 'flex';
+  const n = D.months.length;
   const items = D.cat_detail[cat];
   const entries = Object.entries(items).sort((a,b)=>b[1]-a[1]);
-  const maxV = entries[0][1];
   const catColor = COLORS[D.exp_cats.indexOf(cat)];
+  const displayVals = entries.map(([, v]) => detailMode === 'avg' ? Math.round(v / n * 10) / 10 : v);
+  const maxV = Math.max(...displayVals);
   let html = '<div class="detail-list">';
-  entries.forEach(([name, val]) => {
-    const pct = val / maxV * 100;
+  entries.forEach(([name, val], idx) => {
+    const dv = displayVals[idx];
+    const pct = dv / maxV * 100;
+    const valStr = dv.toLocaleString('ru', {maximumFractionDigits: 1});
     html += `
       <div class="detail-row">
         <div class="detail-name">${name}</div>
         <div class="detail-track">
           <div class="detail-fill" style="width:${pct}%;background:${catColor}99"></div>
-          <span class="detail-label" style="color:${catColor}">${val.toLocaleString('ru',{maximumFractionDigits:0})}</span>
+          <span class="detail-label" style="color:${catColor}">${valStr}</span>
         </div>
-        <div class="detail-val">${val.toLocaleString('ru',{maximumFractionDigits:0})} тыс.</div>
+        <div class="detail-val">${valStr} тыс.</div>
       </div>`;
   });
   html += '</div>';
