@@ -81,7 +81,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 /* DETAIL BAR CHART */
 .detail-title{font-size:12px;color:var(--muted);margin-bottom:10px}
 .detail-list{display:flex;flex-direction:column;gap:8px}
-.detail-row{display:flex;align-items:center;gap:10px}
+.detail-row{display:flex;align-items:center;gap:10px}.detail-row:hover{background:var(--surface2)}.detail-row.selected{background:rgba(56,139,253,0.12);outline:1px solid rgba(56,139,253,0.3)}
 .detail-name{width:160px;font-size:11px;color:var(--text);flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .detail-track{flex:1;height:18px;background:var(--surface2);border-radius:4px;overflow:hidden;position:relative}
 .detail-fill{height:100%;border-radius:4px;transition:width .4s}
@@ -115,7 +115,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
   <span>Фильтр:</span>
   <span class="filter-tag" id="monthTag"></span>
   <span class="filter-tag" id="catTag"></span>
-  <span style="margin-left:auto;opacity:.5">Нажмите на месяц (левый график) или категорию (правый) для фильтрации</span>
+  <span style="margin-left:auto;opacity:.5">Нажмите на месяц или категорию для фильтрации · подкатегорию в детализации — для помесячного графика</span>
 </div>
 
 <div class="main">
@@ -193,191 +193,213 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 </div>
 
 <script>
-const D = {"months": ["2026-01", "2026-02", "2026-03", "2026-04", "2026-05", "2026-06", "2026-07", "2026-08"], "month_labels": ["Янв", "Фев", "Мар", "Апр", "Май", "Июн", "Июл", "Авг"], "income_cats": {"Зарплата": [1843.1, 1595.5, 1807.0, 2039.3, 2926.8, 151.0, 1580.0, 1640.0], "Проекты": [800.0, 1000.0, 900.0, 200.0, 1100.0, 800.0, 500.0, 0.0], "Прочее": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]}, "exp_cats": ["Питание", "Крупные покупки", "Дом и быт", "Одежда и внешний вид", "Отдых и досуг", "Подарки", "Транспорт", "Личные расходы", "Здоровье"], "exp_by_month": {"Питание": [453.6, 519.3, 510.1, 510.6, 610.1, 417.4, 558.4, 497.3], "Крупные покупки": [483.0, 187.6, 100.8, 175.8, 100.8, 155.8, 100.5, 97.8], "Дом и быт": [347.4, 245.5, 105.4, 116.6, 114.6, 138.9, 128.1, 88.8], "Одежда и внешний вид": [74.2, 232.5, 23.1, 70.8, 367.4, 100.3, 78.8, 90.4], "Отдых и досуг": [131.7, 89.5, 253.5, 91.7, 53.1, 231.8, 34.0, 239.1], "Подарки": [21.9, 231.8, 169.8, 60.7, 69.9, 104.4, 179.5, 216.1], "Транспорт": [54.9, 83.6, 82.3, 178.2, 90.7, 98.2, 76.7, 81.2], "Личные расходы": [13.3, 25.5, 112.1, 88.2, 3.9, 16.9, 23.2, 58.6], "Здоровье": [9.0, 19.2, 27.3, 74.0, 112.9, 13.9, 163.3, 77.2]}, "exp_totals": {"Питание": 4076.8, "Крупные покупки": 1402.1, "Дом и быт": 1285.3, "Одежда и внешний вид": 1037.5, "Отдых и досуг": 1124.4, "Подарки": 1054.1, "Транспорт": 745.8, "Личные расходы": 341.7, "Здоровье": 496.8}, "cat_detail": {"Питание": {"Продукты (дом)": -2018.9, "Кафе и рестораны": -976.3, "Обеды вне дома (работа)": -457.0, "Доставка еды": -428.7}, "Крупные покупки": {"Мебель (крупная)": -650.1, "Техника": -377.0, "Ремонт": -328.4}, "Дом и быт": {"Мебель": -521.6, "Техника для дома": -436.8, "Хозтовары": -304.4}, "Одежда и внешний вид": {"Одежда": -581.8, "Косметика и уход": -452.3}, "Отдых и досуг": {"Развлечения": -428.1, "Подарки": -168.5, "Покер": -47.5}, "Подарки": {"Родственникам": -498.5, "ДР коллег": -170.1, "ДР друзей": -128.0, "Благотворительность": -49.0}, "Транспорт": {"Такси": -464.2, "ГСМ": -102.8, "Оформление авто": -76.7, "Обслуживание авто": -62.4, "Парковки и платные дороги": -16.8, "Штрафы ГАИ": -10.8, "Автобус": -1.2}, "Личные расходы": {"Анель ": -162.5, "Арсен": -128.9, "Жандос": -50.4}, "Здоровье": {"Стоматология": -222.5, "Врачи / анализы": -176.5, "Аптека": -94.7}}, "kpi_by_month": {"2026-01": {"inc": 3290.9, "exp": 2440.2, "net": 850.7}, "2026-02": {"inc": 3219.9, "exp": 2743.8, "net": 476.1}, "2026-03": {"inc": 2916.3, "exp": 2800.2, "net": 116.1}, "2026-04": {"inc": 2781.1, "exp": 3755.0, "net": -973.9}, "2026-05": {"inc": 5309.6, "exp": 5505.8, "net": -196.2}, "2026-06": {"inc": 2272.4, "exp": 2948.2, "net": -675.8}, "2026-07": {"inc": 2662.2, "exp": 2312.2, "net": 350.0}, "2026-08": {"inc": 1854.7, "exp": 2225.2, "net": -370.5}}, "kpi_total": {"inc": 24307, "exp": 24731, "net": -424, "avg": 3038}, "kpi_avgs": {"zp": 1697.8, "proj": 662.5, "dep": 52.3}};
+const D = {"months": ["2026-01", "2026-02", "2026-03", "2026-04", "2026-05", "2026-06", "2026-07", "2026-08"], "month_labels": ["Янв", "Фев", "Мар", "Апр", "Май", "Июн", "Июл", "Авг"], "income_cats": {"Зарплата": [1843.1, 1595.5, 1807.0, 2039.3, 2926.8, 151.0, 1580.0, 1640.0], "Проекты": [800.0, 1000.0, 900.0, 200.0, 1100.0, 800.0, 500.0, 0.0], "Прочее": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]}, "exp_cats": ["Питание", "Крупные покупки", "Дом и быт", "Одежда и внешний вид", "Отдых и досуг", "Подарки", "Транспорт", "Личные расходы", "Здоровье"], "exp_by_month": {"Питание": [453.6, 519.3, 510.1, 510.6, 610.1, 417.4, 558.4, 497.3], "Крупные покупки": [483.0, 187.6, 100.8, 175.8, 100.8, 155.8, 100.5, 97.8], "Дом и быт": [347.4, 245.5, 105.4, 116.6, 114.6, 138.9, 128.1, 88.8], "Одежда и внешний вид": [74.2, 232.5, 23.1, 70.8, 367.4, 100.3, 78.8, 90.4], "Отдых и досуг": [131.7, 89.5, 253.5, 91.7, 53.1, 231.8, 34.0, 239.1], "Подарки": [21.9, 231.8, 169.8, 60.7, 69.9, 104.4, 179.5, 216.1], "Транспорт": [54.9, 83.6, 82.3, 178.2, 90.7, 98.2, 76.7, 81.2], "Личные расходы": [13.3, 25.5, 112.1, 88.2, 3.9, 16.9, 23.2, 58.6], "Здоровье": [9.0, 19.2, 27.3, 74.0, 112.9, 13.9, 163.3, 77.2]}, "exp_totals": {"Питание": 4076.8, "Крупные покупки": 1402.1, "Дом и быт": 1285.3, "Одежда и внешний вид": 1037.5, "Отдых и досуг": 1124.4, "Подарки": 1054.1, "Транспорт": 745.8, "Личные расходы": 341.7, "Здоровье": 496.8}, "cat_detail": {"Питание": {"Продукты (дом)": -2018.9, "Кафе и рестораны": -976.3, "Обеды вне дома (работа)": -457.0, "Доставка еды": -428.7}, "Крупные покупки": {"Мебель (крупная)": -650.1, "Техника": -377.0, "Ремонт": -328.4}, "Дом и быт": {"Мебель": -521.6, "Техника для дома": -436.8, "Хозтовары": -304.4}, "Одежда и внешний вид": {"Одежда": -581.8, "Косметика и уход": -452.3}, "Отдых и досуг": {"Развлечения": -428.1, "Подарки": -168.5, "Покер": -47.5}, "Подарки": {"Родственникам": -498.5, "ДР коллег": -170.1, "ДР друзей": -128.0, "Благотворительность": -49.0}, "Транспорт": {"Такси": -464.2, "ГСМ": -102.8, "Оформление авто": -76.7, "Обслуживание авто": -62.4, "Парковки и платные дороги": -16.8, "Штрафы ГАИ": -10.8, "Автобус": -1.2}, "Личные расходы": {"Анель ": -162.5, "Арсен": -128.9, "Жандос": -50.4}, "Здоровье": {"Стоматология": -222.5, "Врачи / анализы": -176.5, "Аптека": -94.7}}, "kpi_by_month": {"2026-01": {"inc": 3290.9, "exp": 2440.2, "net": 850.7}, "2026-02": {"inc": 3219.9, "exp": 2743.8, "net": 476.1}, "2026-03": {"inc": 2916.3, "exp": 2800.2, "net": 116.1}, "2026-04": {"inc": 2781.1, "exp": 3755.0, "net": -973.9}, "2026-05": {"inc": 5309.6, "exp": 5505.8, "net": -196.2}, "2026-06": {"inc": 2272.4, "exp": 2948.2, "net": -675.8}, "2026-07": {"inc": 2662.2, "exp": 2312.2, "net": 350.0}, "2026-08": {"inc": 1854.7, "exp": 2225.2, "net": -370.5}}, "kpi_total": {"inc": 24307, "exp": 24731, "net": -424, "avg": 3038}, "kpi_avgs": {"zp": 1697.8, "proj": 662.5, "dep": 52.3}, "subcat_by_month": {"Питание": {"Доставка еды": [103.4, 69.2, 41.2, 53.9, 83.4, 19.8, 39.4, 18.3], "Кафе и рестораны": [40.5, 79.4, 147.2, 89.7, 204.7, 136.3, 128.8, 149.6], "Обеды вне дома (работа)": [79.7, 61.5, 60.7, 92.6, 41.8, 51.0, 47.4, 22.4], "Продукты (дом)": [200.1, 302.9, 259.2, 272.4, 250.8, 157.7, 291.1, 284.8]}, "Крупные покупки": {"Мебель (крупная)": [182.3, 50.1, 50.1, 115.1, 50.1, 105.1, 49.9, 47.2], "Ремонт": [253.8, 9.2, 9.2, 19.2, 9.2, 9.2, 9.2, 9.2], "Техника": [45.2, 83.2, 41.4, 41.4, 41.4, 41.4, 41.4, 41.4]}, "Дом и быт": {"Мебель": [233.2, 114.5, 22.1, 22.1, 35.0, 35.0, 29.8, 29.8], "Техника для дома": [65.6, 56.4, 50.5, 50.5, 50.4, 56.0, 56.0, 51.5], "Хозтовары": [48.7, 52.2, 32.8, 44.0, 29.1, 47.8, 42.3, 7.5]}, "Одежда и внешний вид": {"Косметика и уход": [70.9, 59.7, 17.4, 68.2, 87.0, 62.9, 14.9, 71.2], "Одежда": [3.3, 172.8, 5.7, 2.7, 280.3, 37.4, 60.5, 19.2]}, "Отдых и досуг": {"Подарки": [7.3, 2.3, 144.0, 0.0, 14.9, 0.0, 0.0, 0.0], "Покер": [9.8, 19.8, 26.0, 19.8, 4.5, 7.2, 0.0, 0.0], "Развлечения": [56.7, 0.0, 0.0, 14.7, 21.8, 77.0, 34.0, 223.9]}, "Подарки": {"Благотворительность": [5.0, 0.0, 2.0, 10.0, 2.0, 0.0, 0.0, 30.0], "ДР друзей": [0.0, 33.3, 0.0, 0.0, 0.0, 66.5, 0.0, 28.2], "ДР коллег": [16.9, 53.0, 62.4, 7.8, 0.0, 5.0, 20.0, 5.0], "Родственникам": [0.0, 145.4, 86.9, 42.9, 67.9, 32.9, 89.5, 32.9]}, "Транспорт": {"Автобус": [0.0, 1.2, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "ГСМ": [0.0, 0.0, 0.0, 0.0, 13.2, 23.5, 29.3, 36.8], "Обслуживание авто": [0.0, 0.0, 0.0, 24.9, 15.2, 9.8, 6.6, 6.0], "Оформление авто": [0.0, 0.0, 0.0, 76.7, 0.0, 0.0, 0.0, 0.0], "Парковки и платные дороги": [0.0, 0.0, 0.0, 0.0, 4.4, 3.7, 0.3, 8.4], "Такси": [54.1, 82.4, 81.0, 75.7, 56.8, 47.5, 40.5, 26.2], "Штрафы ГАИ": [0.0, 0.0, 0.0, 0.0, 0.0, 10.8, 0.0, 0.0]}, "Личные расходы": {"Анель ": [0.0, 3.0, 68.0, 82.0, 0.0, 8.0, 0.0, 1.5], "Арсен": [6.2, 11.2, 13.1, 6.2, 3.9, 7.9, 23.2, 57.1], "Жандос": [7.1, 11.3, 31.0, 0.0, 0.0, 1.0, 0.0, 0.0]}, "Здоровье": {"Аптека": [0.0, 7.7, 15.8, 15.7, 4.3, 4.9, 8.7, 37.6], "Врачи / анализы": [9.0, 11.5, 11.5, 55.4, 68.5, 9.0, 8.3, 3.3], "Стоматология": [0.0, 0.0, 0.0, 0.0, 40.0, 0.0, 146.2, 36.2]}}};
 
 const COLORS = ['#388bfd','#bc8cff','#39d353','#f0883e','#56d4dd','#f85149','#d29922','#ff7b72','#a5d6ff'];
-const INC_COLORS = { 'Зарплата':'#39d353', 'Проекты':'#388bfd', 'Прочее':'#bc8cff' };
+const INC_COLORS = {'Зарплата':'#39d353','Проекты':'#388bfd','Прочее':'#bc8cff'};
 
-let selectedMonth = null; // null = все
-let selectedCat   = null; // null = все
-let detailMode    = 'total'; // 'total' | 'avg'
+// ── STATE ────────────────────────────────────────────────────
+let selectedMonth  = null;
+let selectedCat    = null;
+let selectedSubcat = null;
+let detailMode     = 'total';
 
-// ============================================================
-// CHART DEFAULTS
-// ============================================================
-const TIP = {
-  backgroundColor:'#1c2333', titleColor:'#e6edf3', bodyColor:'#7d8590',
-  borderColor:'#30363d', borderWidth:1, padding:10
-};
+const mi = m => D.months.indexOf(m);
+
+// ── CHART DEFAULTS ───────────────────────────────────────────
+const TIP = {backgroundColor:'#1c2333',titleColor:'#e6edf3',bodyColor:'#7d8590',borderColor:'#30363d',borderWidth:1,padding:10};
 const AXES = {
   x:{ticks:{color:'#7d8590',font:{size:11}},grid:{color:'#21262d'},border:{color:'#30363d'}},
   y:{ticks:{color:'#7d8590',font:{size:11}},grid:{color:'#21262d'},border:{color:'#30363d'}}
 };
 
-// ============================================================
-// INCOME CHART (stacked bar)
-// ============================================================
+// ── INCOME CHART ─────────────────────────────────────────────
+function incBg(k) {
+  return D.months.map(m => !selectedMonth ? INC_COLORS[k]+'99' : m===selectedMonth ? INC_COLORS[k]+'dd' : INC_COLORS[k]+'18');
+}
+function incBorder(k) {
+  return D.months.map(m => !selectedMonth ? INC_COLORS[k] : m===selectedMonth ? INC_COLORS[k] : INC_COLORS[k]+'30');
+}
+
 const incomeChart = new Chart(document.getElementById('incomeChart'), {
-  type: 'bar',
-  data: {
+  type:'bar',
+  data:{
     labels: D.month_labels,
-    datasets: ['Зарплата','Проекты','Прочее'].map(k => ({
-      label: k,
-      data: D.income_cats[k],
-      backgroundColor: INC_COLORS[k] + '99',
-      borderColor: INC_COLORS[k],
-      borderWidth: 2,
-      borderRadius: 4,
+    datasets: ['Зарплата','Проекты','Прочее'].map(k=>({
+      label:k, data:D.income_cats[k],
+      backgroundColor:incBg(k), borderColor:incBorder(k), borderWidth:2, borderRadius:4
     }))
   },
-  options: {
+  options:{
     responsive:true, maintainAspectRatio:false,
-    plugins:{ legend:{labels:{color:'#7d8590',font:{size:11},boxWidth:11,padding:10},position:'top'}, tooltip:{...TIP} },
-    scales:{ x:{...AXES.x, stacked:true}, y:{...AXES.y, stacked:true,
-      ticks:{...AXES.y.ticks, callback:v=>v.toLocaleString('ru')}} }
+    plugins:{legend:{labels:{color:'#7d8590',font:{size:11},boxWidth:11,padding:10},position:'top'},tooltip:{...TIP}},
+    scales:{x:{...AXES.x,stacked:true},y:{...AXES.y,stacked:true,ticks:{...AXES.y.ticks,callback:v=>v.toLocaleString('ru')}}},
+    onClick(evt,els){
+      if(!els.length) return;
+      const m = D.months[els[0].index];
+      selectMonth(m===selectedMonth ? null : m);
+    }
   }
 });
 
-// ============================================================
-// NET BARS (clickable month filter)
-// ============================================================
-const netMax = Math.max(...D.months.map(m => Math.abs(D.kpi_by_month[m].net)));
-const netEl = document.getElementById('netList');
+function refreshIncomeChart(){
+  ['Зарплата','Проекты','Прочее'].forEach((k,di)=>{
+    incomeChart.data.datasets[di].backgroundColor = incBg(k);
+    incomeChart.data.datasets[di].borderColor = incBorder(k);
+  });
+  incomeChart.update('none');
+}
 
-function buildNetBars() {
+// ── NET BARS ─────────────────────────────────────────────────
+const netMax = Math.max(...D.months.map(m=>Math.abs(D.kpi_by_month[m].net)));
+const netEl  = document.getElementById('netList');
+
+function buildNetBars(){
   netEl.innerHTML = '';
-  D.months.forEach((m, i) => {
-    const v = D.kpi_by_month[m].net;
-    const pct = Math.abs(v) / netMax * 100;
-    const color = v >= 0 ? '#39d353' : '#f85149';
-    const sel = selectedMonth === m ? 'selected' : '';
+  D.months.forEach((m,i)=>{
+    const v   = D.kpi_by_month[m].net;
+    const pct = Math.abs(v)/netMax*100;
+    const col = v>=0 ? '#39d353' : '#f85149';
+    const sel = selectedMonth===m ? 'selected' : '';
+    const dim = selectedMonth && selectedMonth!==m ? 'opacity:0.28;' : '';
     netEl.innerHTML += `
-      <div class="net-row ${sel}" data-month="${m}" onclick="selectMonth('${m}')">
+      <div class="net-row ${sel}" onclick="selectMonth('${m}')" style="${dim}cursor:pointer">
         <div class="net-month">${D.month_labels[i]}</div>
-        <div class="net-track"><div class="net-fill" style="width:${pct}%;background:${color}"></div></div>
-        <div class="net-val" style="color:${color}">${v>=0?'+':''}${v.toLocaleString('ru',{maximumFractionDigits:0})}</div>
+        <div class="net-track"><div class="net-fill" style="width:${pct}%;background:${col}"></div></div>
+        <div class="net-val" style="color:${col}">${v>=0?'+':''}${v.toLocaleString('ru',{maximumFractionDigits:0})}</div>
       </div>`;
   });
 }
 buildNetBars();
 
-// ============================================================
-// STACKED EXPENSES CHART
-// ============================================================
-function getStackedData() {
-  const labels = selectedMonth ? [D.month_labels[D.months.indexOf(selectedMonth)]] : D.month_labels;
-  const mi = selectedMonth ? [D.months.indexOf(selectedMonth)] : D.months.map((_,i)=>i);
-  const cats = selectedCat ? [selectedCat] : D.exp_cats;
-  return {
-    labels,
-    datasets: cats.map((cat, ci) => {
-      const color = COLORS[D.exp_cats.indexOf(cat)];
-      return {
-        label: cat,
-        data: mi.map(i => D.exp_by_month[cat][i]),
-        backgroundColor: color + '99',
-        borderColor: color,
-        borderWidth: 1,
-        borderRadius: 4,
-      };
-    })
-  };
+// ── STACKED EXPENSES CHART ────────────────────────────────────
+function stackedDatasets(){
+  // SUBCAT MODE: one subcategory, all months
+  if(selectedSubcat && selectedCat && D.subcat_by_month[selectedCat]?.[selectedSubcat]){
+    const vals = D.subcat_by_month[selectedCat][selectedSubcat];
+    const col  = COLORS[D.exp_cats.indexOf(selectedCat)];
+    return [{
+      label: selectedSubcat, data: vals,
+      backgroundColor: D.months.map(m => !selectedMonth ? col+'99' : m===selectedMonth ? col+'dd' : col+'18'),
+      borderColor: col, borderWidth:2, borderRadius:4
+    }];
+  }
+  // NORMAL MODE: all categories with per-bar highlight
+  return D.exp_cats.map((cat,ci)=>{
+    const col   = COLORS[ci];
+    const catOk = !selectedCat || selectedCat===cat;
+    return {
+      label:cat, data:D.exp_by_month[cat],
+      backgroundColor: D.months.map(m=>{
+        const mOk = !selectedMonth || m===selectedMonth;
+        return (catOk && mOk) ? col+'cc' : col+'12';
+      }),
+      borderColor: D.months.map(m=>{
+        const mOk = !selectedMonth || m===selectedMonth;
+        return (catOk && mOk) ? col : col+'20';
+      }),
+      borderWidth:1, borderRadius:4
+    };
+  });
 }
 
-const stackedChart = new Chart(document.getElementById('stackedChart'), {
-  type: 'bar',
-  data: getStackedData(),
-  options: {
+const stackedChart = new Chart(document.getElementById('stackedChart'),{
+  type:'bar',
+  data:{labels:D.month_labels, datasets:stackedDatasets()},
+  options:{
     responsive:true, maintainAspectRatio:false,
-    plugins:{ legend:{labels:{color:'#7d8590',font:{size:10},boxWidth:10,padding:8},position:'bottom'}, tooltip:{...TIP} },
-    scales:{
-      x:{...AXES.x, stacked:true},
-      y:{...AXES.y, stacked:true, ticks:{...AXES.y.ticks, callback:v=>v.toLocaleString('ru')}}
+    plugins:{legend:{labels:{color:'#7d8590',font:{size:10},boxWidth:10,padding:8},position:'bottom'},tooltip:{...TIP}},
+    scales:{x:{...AXES.x,stacked:true},y:{...AXES.y,stacked:true,ticks:{...AXES.y.ticks,callback:v=>v.toLocaleString('ru')}}},
+    onClick(evt,els){
+      if(!els.length) return;
+      const m = D.months[els[0].index];
+      selectMonth(m===selectedMonth ? null : m);
     }
   }
 });
 
-// ============================================================
-// DONUT CHART
-// ============================================================
-function getDonutData() {
-  const cats = D.exp_cats;
-  const vals = cats.map(c => {
-    if (selectedMonth) {
-      const mi = D.months.indexOf(selectedMonth);
-      return D.exp_by_month[c][mi];
-    }
-    return D.exp_totals[c];
-  });
-  return { labels: cats, datasets:[{
-    data: vals,
-    backgroundColor: COLORS.map(c=>c+'cc'),
-    borderColor:'#161b22', borderWidth:3, hoverOffset:8
-  }]};
+function refreshStackedChart(){
+  const isSubcat = !!(selectedSubcat && selectedCat);
+  stackedChart.data.datasets = stackedDatasets();
+  stackedChart.options.scales.x.stacked = !isSubcat;
+  stackedChart.options.scales.y.stacked = !isSubcat;
+  const sub = document.getElementById('stackedSub');
+  if(selectedSubcat)       sub.textContent = `${selectedCat} → ${selectedSubcat} · по месяцам`;
+  else if(selectedCat)     sub.textContent = `${selectedCat} · по месяцам`;
+  else if(selectedMonth)   sub.textContent = `${D.month_labels[mi(selectedMonth)]} · все категории`;
+  else                     sub.textContent = 'тыс. тенге по месяцам · топ-9 категорий';
+  stackedChart.update('none');
 }
 
-const donutChart = new Chart(document.getElementById('donutChart'), {
+// ── DONUT CHART ───────────────────────────────────────────────
+function donutData(){
+  const vals = D.exp_cats.map(c => selectedMonth ? D.exp_by_month[c][mi(selectedMonth)] : D.exp_totals[c]);
+  const bg   = D.exp_cats.map((cat,i) =>
+    !selectedCat ? COLORS[i]+'cc' : cat===selectedCat ? COLORS[i]+'ee' : COLORS[i]+'1e'
+  );
+  return {vals, bg};
+}
+
+const donutChart = new Chart(document.getElementById('donutChart'),{
   type:'doughnut',
-  data: getDonutData(),
+  data:(()=>{const {vals,bg}=donutData(); return {labels:D.exp_cats,datasets:[{data:vals,backgroundColor:bg,borderColor:'#161b22',borderWidth:3,hoverOffset:8}]};})(),
   options:{
     responsive:true, maintainAspectRatio:false, cutout:'62%',
     plugins:{
       legend:{display:false},
-      tooltip:{...TIP, callbacks:{label:ctx=>` ${ctx.label}: ${ctx.parsed.toLocaleString('ru',{maximumFractionDigits:0})} тыс.`}}
+      tooltip:{...TIP,callbacks:{label:ctx=>` ${ctx.label}: ${ctx.parsed.toLocaleString('ru',{maximumFractionDigits:0})} тыс.`}}
     },
-    onClick(evt, els) {
-      if (!els.length) return;
+    onClick(evt,els){
+      if(!els.length) return;
       const cat = D.exp_cats[els[0].index];
-      selectCat(cat === selectedCat ? null : cat);
+      selectCat(cat===selectedCat ? null : cat);
     }
   }
 });
 
-// ============================================================
-// CAT LIST (right side of donut)
-// ============================================================
-function buildCatList() {
-  const el = document.getElementById('catList');
-  el.innerHTML = '';
-  const vals = D.exp_cats.map(c => {
-    if (selectedMonth) return D.exp_by_month[c][D.months.indexOf(selectedMonth)];
-    return D.exp_totals[c];
-  });
+function refreshDonut(){
+  const {vals,bg} = donutData();
+  donutChart.data.datasets[0].data = vals;
+  donutChart.data.datasets[0].backgroundColor = bg;
+  donutChart.update('none');
+}
+
+// ── CAT LIST ──────────────────────────────────────────────────
+function buildCatList(){
+  const el  = document.getElementById('catList');
+  const vals = D.exp_cats.map(c => selectedMonth ? D.exp_by_month[c][mi(selectedMonth)] : D.exp_totals[c]);
   const maxV = Math.max(...vals);
-  const totalV = vals.reduce((a, b) => a + b, 0);
-  D.exp_cats.forEach((cat, i) => {
-    const pct = vals[i] / maxV * 100;
-    const sharePct = totalV > 0 ? Math.round(vals[i] / totalV * 100) : 0;
-    const active = selectedCat === cat ? 'active' : '';
-    el.innerHTML += `
-      <div class="cat-row ${active}" onclick="selectCat('${cat}')">
+  const totV = vals.reduce((a,b)=>a+b,0);
+  el.innerHTML = D.exp_cats.map((cat,i)=>{
+    const pct  = vals[i]/maxV*100;
+    const shr  = totV>0 ? Math.round(vals[i]/totV*100) : 0;
+    const act  = selectedCat===cat ? 'active' : '';
+    const dim  = selectedCat && selectedCat!==cat ? 'opacity:0.3;' : '';
+    return `
+      <div class="cat-row ${act}" onclick="selectCat('${cat}')" style="${dim}">
         <div class="cat-dot" style="background:${COLORS[i]}"></div>
-        <div class="cat-name">${cat} <span style="color:var(--muted);font-size:10px">(${sharePct}%)</span></div>
+        <div class="cat-name">${cat} <span style="color:var(--muted);font-size:10px">(${shr}%)</span></div>
         <div class="cat-track"><div class="cat-fill" style="width:${pct}%;background:${COLORS[i]}"></div></div>
         <div class="cat-val">${vals[i].toLocaleString('ru',{maximumFractionDigits:0})}</div>
       </div>`;
-  });
+  }).join('');
 }
 buildCatList();
 
-// ============================================================
-// DETAIL MODE TOGGLE
-// ============================================================
-function setDetailMode(mode) {
+// ── DETAIL MODE TOGGLE ────────────────────────────────────────
+function setDetailMode(mode){
   detailMode = mode;
-  document.getElementById('btnTotal').className = 'toggle-btn' + (mode === 'total' ? ' active' : '');
-  document.getElementById('btnAvg').className   = 'toggle-btn' + (mode === 'avg'   ? ' active' : '');
-  if (selectedCat) buildDetail(selectedCat);
+  document.getElementById('btnTotal').className = 'toggle-btn'+(mode==='total'?' active':'');
+  document.getElementById('btnAvg').className   = 'toggle-btn'+(mode==='avg'?' active':'');
+  if(selectedCat) buildDetail(selectedCat);
 }
 
-// ============================================================
-// DETAIL CHART
-// ============================================================
-function buildDetail(cat) {
-  const title = document.getElementById('detailTitle');
+// ── DETAIL CHART ──────────────────────────────────────────────
+function buildDetail(cat){
+  const title   = document.getElementById('detailTitle');
   const content = document.getElementById('detailContent');
-  const toggle = document.getElementById('detailToggle');
-  if (!cat) {
+  const toggle  = document.getElementById('detailToggle');
+  if(!cat){
     title.textContent = 'Детализация расходов';
     toggle.style.display = 'none';
     content.innerHTML = '<div class="empty">← Нажмите на категорию в «Структуре расходов»</div>';
@@ -387,86 +409,84 @@ function buildDetail(cat) {
   toggle.style.display = 'flex';
   const n = D.months.length;
   const items = D.cat_detail[cat];
-  const entries = Object.entries(items).sort((a,b)=>a[1]-b[1]); // ascending: самые большие расходы первыми (наиболее отрицательные)
+  const entries = Object.entries(items).sort((a,b)=>a[1]-b[1]);
   const catColor = COLORS[D.exp_cats.indexOf(cat)];
-  const displayVals = entries.map(([, v]) => detailMode === 'avg' ? Math.round(Math.abs(v) / n * 10) / 10 : Math.abs(v));
+  const displayVals = entries.map(([,v]) => detailMode==='avg' ? Math.round(Math.abs(v)/n*10)/10 : Math.abs(v));
   const maxV = Math.max(...displayVals);
-  let html = '<div class="detail-list">';
-  entries.forEach(([name, val], idx) => {
-    const dv = displayVals[idx];
-    const pct = dv / maxV * 100;
-    const valStr = dv.toLocaleString('ru', {maximumFractionDigits: 1});
-    html += `
-      <div class="detail-row">
+  const rows = entries.map(([name,],idx)=>{
+    const dv  = displayVals[idx];
+    const pct = dv/maxV*100;
+    const str = dv.toLocaleString('ru',{maximumFractionDigits:1});
+    const sel = selectedSubcat===name;
+    const dim = selectedSubcat && !sel ? 'opacity:0.3;' : '';
+    const fillCol = sel ? catColor+'ee' : catColor+'88';
+    const safeN = name.replace(/\/g,'\\').replace(/'/g,"\'");
+    return `
+      <div class="detail-row${sel?' selected':''}" onclick="selectSubcat('${safeN}')"
+           style="cursor:pointer;padding:4px 6px;border-radius:6px;transition:background .15s,opacity .2s;${dim}">
         <div class="detail-name">${name}</div>
         <div class="detail-track">
-          <div class="detail-fill" style="width:${pct}%;background:${catColor}99"></div>
-          <span class="detail-label" style="color:${catColor}">${valStr}</span>
+          <div class="detail-fill" style="width:${pct}%;background:${fillCol}"></div>
+          <span class="detail-label" style="color:${catColor}">${str}</span>
         </div>
-        <div class="detail-val">${valStr} тыс.</div>
+        <div class="detail-val">${str} тыс.</div>
       </div>`;
-  });
-  html += '</div>';
-  content.innerHTML = html;
+  }).join('');
+  const hint = selectedSubcat
+    ? `<div style="margin-top:10px;font-size:10px;color:var(--muted)">↑ Помесячная динамика «${selectedSubcat}» — в графике «Расходы по категориям» слева</div>`
+    : `<div style="margin-top:10px;font-size:10px;color:var(--muted)">Нажмите на строку → увидите помесячную динамику в графике слева</div>`;
+  content.innerHTML = `<div class="detail-list">${rows}</div>${hint}`;
 }
 
-// KPI карточки статичны (ЗП avg, Проекты avg, Депозиты avg)
-function updateKPI() {}
-
-// ============================================================
-// FILTER TAGS
-// ============================================================
-function updateTags() {
+// ── FILTER TAGS ───────────────────────────────────────────────
+function updateTags(){
   const mTag = document.getElementById('monthTag');
   const cTag = document.getElementById('catTag');
-  if (selectedMonth) {
-    const lbl = D.month_labels[D.months.indexOf(selectedMonth)];
+  if(selectedMonth){
     mTag.className = 'filter-tag active';
-    mTag.innerHTML = `📅 ${lbl} <span class="x" onclick="selectMonth(null)">✕</span>`;
-  } else {
-    mTag.className = 'filter-tag';
-  }
-  if (selectedCat) {
+    mTag.innerHTML = `📅 ${D.month_labels[mi(selectedMonth)]} <span class="x" onclick="selectMonth(null)">✕</span>`;
+  } else { mTag.className='filter-tag'; }
+  if(selectedCat){
+    const lbl = selectedSubcat ? `${selectedCat} → ${selectedSubcat}` : selectedCat;
     cTag.className = 'filter-tag active';
-    cTag.innerHTML = `📂 ${selectedCat} <span class="x" onclick="selectCat(null)">✕</span>`;
-  } else {
-    cTag.className = 'filter-tag';
-  }
+    cTag.innerHTML = `📂 ${lbl} <span class="x" onclick="clearCat()">✕</span>`;
+  } else { cTag.className='filter-tag'; }
 }
+function clearCat(){ selectedCat=null; selectedSubcat=null; refreshAll(); }
 
-// ============================================================
-// SELECT ACTIONS
-// ============================================================
-function selectMonth(m) {
-  selectedMonth = selectedMonth === m ? null : m;
+// ── REFRESH ALL ───────────────────────────────────────────────
+function refreshAll(){
+  refreshIncomeChart();
   buildNetBars();
-  updateTags();
-  // Refresh stacked chart
-  const sd = getStackedData();
-  stackedChart.data.labels = sd.labels;
-  stackedChart.data.datasets = sd.datasets;
-  stackedChart.update();
-  // Refresh donut
-  const dd = getDonutData();
-  donutChart.data.datasets[0].data = dd.datasets[0].data;
-  donutChart.update();
-  buildCatList();
-  // Update stacked sub
-  document.getElementById('stackedSub').textContent = selectedMonth
-    ? `тыс. тенге · ${D.month_labels[D.months.indexOf(selectedMonth)]}`
-    : 'тыс. тенге по месяцам · топ-9 категорий';
-}
-
-function selectCat(cat) {
-  selectedCat = selectedCat === cat ? null : cat;
-  updateTags();
+  refreshStackedChart();
+  refreshDonut();
   buildCatList();
   buildDetail(selectedCat);
-  // Update stacked
-  const sd = getStackedData();
-  stackedChart.data.datasets = sd.datasets;
-  stackedChart.update();
+  updateTags();
 }
+
+// ── SELECT ACTIONS ────────────────────────────────────────────
+function selectMonth(m){
+  selectedMonth = selectedMonth===m ? null : m;
+  selectedCat = null; selectedSubcat = null;
+  refreshAll();
+}
+
+function selectCat(cat){
+  if(selectedCat===cat && !selectedSubcat){ selectedCat=null; }
+  else { selectedCat=cat; selectedMonth=null; selectedSubcat=null; }
+  refreshAll();
+}
+
+function selectSubcat(sub){
+  selectedSubcat = selectedSubcat===sub ? null : sub;
+  selectedMonth = null;
+  refreshAll();
+}
+
+// KPI карточки статичны
+function updateKPI(){}
+
 </script>
 </body>
 </html>
